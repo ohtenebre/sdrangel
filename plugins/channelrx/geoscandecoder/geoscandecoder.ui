@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>406</width>
-    <height>774</height>
+    <height>793</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -590,6 +590,22 @@
            </size>
           </property>
          </spacer>
+        </item>
+        <item>
+         <widget class="QLabel" name="copyrightLabel">
+          <property name="text">
+           <string>Аддон разработан в СибГУТИ, обращаться: &lt;a href=&quot;mailto:rectorat@sibsutis.ru&quot;&gt;rectorat@sibsutis.ru&lt;/a&gt;</string>
+          </property>
+          <property name="textFormat">
+           <enum>Qt::RichText</enum>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+          <property name="openExternalLinks">
+           <bool>true</bool>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="ButtonSwitch" name="useFileTime">
@@ -1431,44 +1447,44 @@
           <attribute name="title">
            <string>Изображение</string>
           </attribute>
-           <layout class="QVBoxLayout" name="verticalLayout_2">
-            <item>
-             <layout class="QHBoxLayout" name="mergeLayout">
-              <item>
-               <widget class="QCheckBox" name="mergeMode">
-                <property name="text">
-                 <string>Режим слияния</string>
-                </property>
-                <property name="checked">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="saveImageBtn">
-                <property name="text">
-                 <string>Сохранить изображение</string>
-                </property>
-                <property name="visible">
-                 <bool>false</bool>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <spacer name="mergeSpacer">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-             </layout>
-            </item>
+          <layout class="QVBoxLayout" name="verticalLayout_2">
+           <item>
+            <layout class="QHBoxLayout" name="mergeLayout">
+             <item>
+              <widget class="QCheckBox" name="mergeMode">
+               <property name="text">
+                <string>Режим слияния</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="saveImageBtn">
+               <property name="visible">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>Сохранить изображение</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="mergeSpacer">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </item>
            <item>
             <widget class="QLabel" name="imageLabel">
              <property name="text">
