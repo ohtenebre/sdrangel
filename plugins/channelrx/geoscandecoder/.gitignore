@@ -1,0 +1,9 @@
+.DS_Store
+todo.txt
+test_data/*.wav
+test_data/*.bin
+test_data/*.zip
+test_data/*.raw
+geoscan_iq_*.bin
+output.wav
+path

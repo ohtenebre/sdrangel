@@ -217,6 +217,10 @@ else()
     message(STATUS "Not building wdsprx (ENABLE_CHANNELRX_WDSPRX=${ENABLE_CHANNELRX_WDSPRX} WDSP_SUPPORT=${WDSP_SUPPORT})")
 endif()
 
+if (ENABLE_CHANNELRX_GEOSCAN)
+    add_subdirectory(geoscandecoder)
+endif()
+
 # need ffmpeg 3.1 that correstonds to
 # libavutil 55.27.100
 # libavcodec 57.48.101
