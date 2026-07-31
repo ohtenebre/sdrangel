@@ -29,6 +29,11 @@ set(geoscandecoder_SOURCES
 
 set_source_files_properties(${sgp4_SOURCE_DIR}/src/cpp/SGP4.c PROPERTIES LANGUAGE CXX)
 
+if(MSVC)
+    # SGP4.c defines its own fmod() which clashes with the MSVC intrinsic
+    set_source_files_properties(${sgp4_SOURCE_DIR}/src/cpp/SGP4.c PROPERTIES COMPILE_DEFINITIONS "fmod=sgp4_fmod")
+endif()
+
 set(geoscandecoder_HEADERS
     geoscandecoder.h
     geoscandecoderplugin.h

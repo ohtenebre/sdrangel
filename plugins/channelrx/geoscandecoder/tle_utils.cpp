@@ -40,6 +40,15 @@ static bool tle_parse_epoch(const std::string& tle1, int& year, double& day_of_y
     }
 }
 
+#ifdef _WIN32
+static time_t tle_timegm(std::tm *tm)
+{
+    return _mkgmtime(tm);
+}
+#else
+#define tle_timegm timegm
+#endif
+
 std::pair<bool, std::string> tle_check_freshness(const std::string& tle1) {
     int year;
     double doy;
@@ -51,7 +60,7 @@ std::pair<bool, std::string> tle_check_freshness(const std::string& tle1) {
     epoch_tm.tm_year = year - 1900;
     epoch_tm.tm_mon = 0;
     epoch_tm.tm_mday = 1;
-    time_t epoch_tt = timegm(&epoch_tm);
+    time_t epoch_tt = tle_timegm(&epoch_tm);
     epoch_tt += static_cast<time_t>((doy - 1.0) * 86400.0);
 
     time_t now = time(nullptr);
