@@ -14,6 +14,20 @@
 #include <stdio.h>
 #include <string.h>
 #include <vector>
+#include <cstdint>
+
+#if defined(_MSC_VER)
+#include <intrin.h>
+static inline int popcount32(uint32_t x)
+{
+    return (int)__popcnt(x);
+}
+#else
+static inline int popcount32(uint32_t x)
+{
+    return __builtin_popcount(x);
+}
+#endif
 
 MESSAGE_CLASS_DEFINITION(GEOSCANDecoderBaseband::MsgConfigureGEOSCANDecoderBaseband, Message)
 MESSAGE_CLASS_DEFINITION(GEOSCANDecoderBaseband::MsgSampleCount, Message)
@@ -267,12 +281,12 @@ void GEOSCANDecoderBaseband::processSample(std::complex<float> s, bool iqEnabled
 
         bool syncFound = false;
         int thresh = m_settings.m_corrThreshold;
-        if (__builtin_popcount(st.shiftReg ^ 0x930B51DE) <= thresh)
+        if (popcount32(st.shiftReg ^ 0x930B51DE) <= thresh)
         {
             st.inverted = false;
             syncFound = true;
         }
-        else if (__builtin_popcount(st.shiftReg ^ 0x6CF4AE21) <= thresh)
+        else if (popcount32(st.shiftReg ^ 0x6CF4AE21) <= thresh)
         {
             st.inverted = true;
             syncFound = true;

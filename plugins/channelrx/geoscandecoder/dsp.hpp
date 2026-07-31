@@ -7,6 +7,10 @@
 #include <complex>
 #include <vector>
 
+#ifndef M_PIf
+#define M_PIf 3.14159265358979323846f
+#endif
+
 // Generate low-pass FIR filter coefficients
 std::vector<float> generate_lowpass(
     float gain,
@@ -45,8 +49,8 @@ class FrequencyShifter {
 
     std::complex<float> processSample(std::complex<float> s)
     {
-        float si, co;
-        sincosf(m_phase, &si, &co);
+        float si = sinf(m_phase);
+        float co = cosf(m_phase);
 
         s *= std::complex<float>(co, si);
 
