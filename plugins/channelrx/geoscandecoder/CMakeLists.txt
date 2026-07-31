@@ -16,6 +16,11 @@ if(NOT sgp4_POPULATED)
     FetchContent_Populate(sgp4)
 endif()
 
+# TLE.cpp uses Fortran-style 'd' literal suffixes (e.g. 24.0d) which MSVC rejects
+file(READ ${sgp4_SOURCE_DIR}/src/cpp/TLE.cpp tle_content)
+string(REGEX REPLACE "([0-9]+\\.[0-9]*)[dD]" "\\1" tle_content "${tle_content}")
+file(WRITE ${sgp4_SOURCE_DIR}/src/cpp/TLE.cpp "${tle_content}")
+
 set(geoscandecoder_SOURCES
     geoscandecoder.cpp
     geoscandecoderplugin.cpp
