@@ -63,6 +63,7 @@ class GEOSCANDecoderGUI : public ChannelGUI {
     GEOSCANDecoderSettings m_settings;
     qint64 m_deviceCenterFrequency;
     int m_basebandSampleRate;
+    bool m_resamplerInputFollowsDevice = true;
     uint32_t m_tickCount;
     int m_frameTotal;
     int m_frameCrcOk;

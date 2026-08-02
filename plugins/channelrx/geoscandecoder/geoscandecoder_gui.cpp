@@ -591,6 +591,12 @@ bool GEOSCANDecoderGUI::handleMessage(const Message &msg)
         m_deviceCenterFrequency = notif.getCenterFrequency();
         m_basebandSampleRate = notif.getSampleRate();
         ui->deltaFrequency->setValueRange(false, 7, -m_basebandSampleRate / 2, m_basebandSampleRate / 2);
+        if (m_resamplerInputFollowsDevice)
+        {
+            m_settings.m_resamplerInputRate = (int)m_basebandSampleRate;
+            ui->resamplerInputRate->setValue(m_settings.m_resamplerInputRate);
+            applySettings(QStringList("resamplerInputRate"));
+        }
         m_satFreq->setText(QString::number(m_deviceCenterFrequency));
         on_satFreq_editingFinished();
         return true;
@@ -1218,6 +1224,7 @@ void GEOSCANDecoderGUI::on_resamplerEnabled_toggled(bool checked)
 void GEOSCANDecoderGUI::on_resamplerInputRate_changed(double value)
 {
     m_settings.m_resamplerInputRate = (int)value;
+    m_resamplerInputFollowsDevice = ((int)value == m_basebandSampleRate);
     applySettings(QStringList("resamplerInputRate"));
 }
 
