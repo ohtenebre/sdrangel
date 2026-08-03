@@ -38,10 +38,10 @@ void GEOSCANDecoderSettings::resetToDefaults()
     m_lpfEnabled = true;
     m_lpfCutoff = 7000.0f;
     m_lpfTransition = 2000.0f;
-    m_lpfGain = 0.3f;
+    m_lpfGain = 1.f;
     m_aaLpfEnabled = true;
-    m_aaLpfCutoff = 4800.0f;
-    m_aaLpfTransition = 4800.0f;
+    m_aaLpfCutoff = 6000.0f;
+    m_aaLpfTransition = 6000.0f;
     m_aaLpfGain = 1.0f;
     m_resamplerEnabled = true;
     m_resamplerInputRate = 2000000;
@@ -157,8 +157,8 @@ bool GEOSCANDecoderSettings::deserialize(const QByteArray &data)
         d.readReal(25, &m_lpfGain, 0.0045f);
         d.readBool(41, &m_lpfEnabled, true);
         d.readBool(42, &m_aaLpfEnabled, true);
-        d.readReal(43, &m_aaLpfCutoff, 4800.0f);
-        d.readReal(44, &m_aaLpfTransition, 4800.0f);
+        d.readReal(43, &m_aaLpfCutoff, 6000.0f);
+        d.readReal(44, &m_aaLpfTransition, 6000.0f);
         d.readReal(45, &m_aaLpfGain, 1.0f);
         d.readBool(26, &m_resamplerEnabled, true);
         d.readS32(27, &m_resamplerInputRate, 2000000);

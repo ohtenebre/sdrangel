@@ -37,7 +37,7 @@ MESSAGE_CLASS_DEFINITION(GEOSCANDecoderBaseband::MsgTelemetry, Message)
 MESSAGE_CLASS_DEFINITION(GEOSCANDecoderBaseband::MsgDebugText, Message)
 MESSAGE_CLASS_DEFINITION(GEOSCANDecoderBaseband::MsgImageData, Message)
 
-GEOSCANDecoderBaseband::GEOSCANDecoderBaseband() : m_lpf(std::make_shared<FIRFilter>(generate_lowpass(0.0045f, 48000.f, 7000.f, 2000.f))), m_aaFilter(std::make_shared<ComplexFIRFilter>(generate_lowpass(1.0f, 48000.f, 4800.f, 4800.f))), m_messageQueueToGUI(nullptr), m_basebandSampleRate(48000), m_effectiveSampleRate(48000)
+GEOSCANDecoderBaseband::GEOSCANDecoderBaseband() : m_lpf(std::make_shared<FIRFilter>(generate_lowpass(0.0045f, 48000.f, 7000.f, 2000.f))), m_aaFilter(std::make_shared<ComplexFIRFilter>(generate_lowpass(1.0f, 48000.f, 6000.f, 6000.f))), m_messageQueueToGUI(nullptr), m_basebandSampleRate(48000), m_effectiveSampleRate(48000)
 {
     m_freqShifter.setFrequency(-(float)m_settings.m_inputFrequencyOffset, (float)m_basebandSampleRate);
 

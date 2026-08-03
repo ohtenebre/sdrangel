@@ -318,7 +318,7 @@ void GEOSCANDecoderGUI::displaySettings()
     ui->aaFilterCutoff->setValue(m_settings.m_aaLpfCutoff);
     ui->aaFilterTransition->setValue(m_settings.m_aaLpfTransition);
     ui->aaFilterGain->setValue(m_settings.m_aaLpfGain);
-    ui->resamplerEnabled->setChecked(m_settings.m_resamplerEnabled);
+    ui->groupBox_2->setChecked(m_settings.m_resamplerEnabled);
     ui->resamplerInputRate->setValue(m_settings.m_resamplerInputRate);
     ui->resamplerOutputRate->setValue(m_settings.m_resamplerOutputRate);
     ui->symSyncType->setCurrentIndex(m_settings.m_symSyncType);
@@ -366,7 +366,7 @@ void GEOSCANDecoderGUI::makeUIConnections()
     QObject::connect(ui->aaFilterTransition, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &GEOSCANDecoderGUI::on_aaLpfTransition_changed);
     QObject::connect(ui->aaFilterGain, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &GEOSCANDecoderGUI::on_aaLpfGain_changed);
     QObject::connect(ui->aaFilterGroup, &QGroupBox::toggled, this, &GEOSCANDecoderGUI::on_aaLpfEnabled_toggled);
-    QObject::connect(ui->resamplerEnabled, &QCheckBox::toggled, this, &GEOSCANDecoderGUI::on_resamplerEnabled_toggled);
+    QObject::connect(ui->groupBox_2, &QGroupBox::toggled, this, &GEOSCANDecoderGUI::on_resamplerEnabled_toggled);
     QObject::connect(ui->resamplerInputRate, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &GEOSCANDecoderGUI::on_resamplerInputRate_changed);
     QObject::connect(ui->resamplerOutputRate, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &GEOSCANDecoderGUI::on_resamplerOutputRate_changed);
     QObject::connect(ui->symSyncType, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &GEOSCANDecoderGUI::on_symSyncType_changed);
@@ -410,12 +410,14 @@ void GEOSCANDecoderGUI::on_lpfEnabled_toggled(bool checked)
 void GEOSCANDecoderGUI::on_aaLpfCutoff_changed(double value)
 {
     m_settings.m_aaLpfCutoff = value;
+    m_aaLpfFollowsDevice = (value == m_basebandSampleRate / 8.0);
     applySettings(QStringList("aaLpfCutoff"));
 }
 
 void GEOSCANDecoderGUI::on_aaLpfTransition_changed(double value)
 {
     m_settings.m_aaLpfTransition = value;
+    m_aaLpfFollowsDevice = (value == m_basebandSampleRate / 8.0);
     applySettings(QStringList("aaLpfTransition"));
 }
 
@@ -648,6 +650,14 @@ bool GEOSCANDecoderGUI::handleMessage(const Message &msg)
             m_settings.m_resamplerInputRate = (int)m_basebandSampleRate;
             ui->resamplerInputRate->setValue(m_settings.m_resamplerInputRate);
             applySettings(QStringList("resamplerInputRate"));
+        }
+        if (m_aaLpfFollowsDevice)
+        {
+            m_settings.m_aaLpfCutoff = m_basebandSampleRate / 8.0f;
+            m_settings.m_aaLpfTransition = m_basebandSampleRate / 8.0f;
+            ui->aaFilterCutoff->setValue(m_settings.m_aaLpfCutoff);
+            ui->aaFilterTransition->setValue(m_settings.m_aaLpfTransition);
+            applySettings(QStringList({"aaLpfCutoff", "aaLpfTransition"}));
         }
         m_satFreq->setText(QString::number(m_deviceCenterFrequency));
         on_satFreq_editingFinished();

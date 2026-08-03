@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>406</width>
-    <height>793</height>
+    <height>876</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -860,7 +860,7 @@
                 <double>100.000000000000000</double>
                </property>
                <property name="maximum">
-                <double>20000.000000000000000</double>
+                <double>400000.000000000000000</double>
                </property>
                <property name="singleStep">
                 <double>500.000000000000000</double>
@@ -896,7 +896,7 @@
                 <double>100.000000000000000</double>
                </property>
                <property name="maximum">
-                <double>20000.000000000000000</double>
+                <double>400000.000000000000000</double>
                </property>
                <property name="singleStep">
                 <double>500.000000000000000</double>
@@ -954,27 +954,15 @@
         <property name="alignment">
          <set>Qt::AlignCenter</set>
         </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
         <layout class="QVBoxLayout" name="verticalLayout_20">
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_2">
-           <item>
-            <layout class="QVBoxLayout" name="verticalLayout_19">
-             <item>
-              <widget class="QLabel" name="label_5">
-               <property name="text">
-                <string/>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QCheckBox" name="resamplerEnabled">
-               <property name="text">
-                <string>Включить</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
            <item>
             <layout class="QVBoxLayout" name="verticalLayout_18">
              <item>
@@ -1096,7 +1084,7 @@
                 <double>100.000000000000000</double>
                </property>
                <property name="maximum">
-                <double>20000.000000000000000</double>
+                <double>400000.000000000000000</double>
                </property>
                <property name="singleStep">
                 <double>500.000000000000000</double>
@@ -1135,7 +1123,7 @@
                 <double>100.000000000000000</double>
                </property>
                <property name="maximum">
-                <double>20000.000000000000000</double>
+                <double>400000.000000000000000</double>
                </property>
                <property name="singleStep">
                 <double>500.000000000000000</double>
