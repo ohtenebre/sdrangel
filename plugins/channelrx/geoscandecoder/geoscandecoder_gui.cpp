@@ -307,6 +307,10 @@ void GEOSCANDecoderGUI::displaySettings()
     ui->filterCutoff->setValue(m_settings.m_lpfCutoff);
     ui->filterTransition->setValue(m_settings.m_lpfTransition);
     ui->filterGain->setValue(m_settings.m_lpfGain);
+    ui->groupBox->setChecked(m_settings.m_lpfEnabled);
+    ui->filterCutoff->setEnabled(m_settings.m_lpfEnabled);
+    ui->filterTransition->setEnabled(m_settings.m_lpfEnabled);
+    ui->filterGain->setEnabled(m_settings.m_lpfEnabled);
     ui->resamplerEnabled->setChecked(m_settings.m_resamplerEnabled);
     ui->resamplerInputRate->setValue(m_settings.m_resamplerInputRate);
     ui->resamplerOutputRate->setValue(m_settings.m_resamplerOutputRate);
@@ -350,6 +354,7 @@ void GEOSCANDecoderGUI::makeUIConnections()
     QObject::connect(ui->filterCutoff, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &GEOSCANDecoderGUI::on_lpfCutoff_changed);
     QObject::connect(ui->filterTransition, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &GEOSCANDecoderGUI::on_lpfTransition_changed);
     QObject::connect(ui->filterGain, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &GEOSCANDecoderGUI::on_lpfGain_changed);
+    QObject::connect(ui->groupBox, &QGroupBox::toggled, this, &GEOSCANDecoderGUI::on_lpfEnabled_toggled);
     QObject::connect(ui->resamplerEnabled, &QCheckBox::toggled, this, &GEOSCANDecoderGUI::on_resamplerEnabled_toggled);
     QObject::connect(ui->resamplerInputRate, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &GEOSCANDecoderGUI::on_resamplerInputRate_changed);
     QObject::connect(ui->resamplerOutputRate, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &GEOSCANDecoderGUI::on_resamplerOutputRate_changed);
@@ -380,6 +385,15 @@ void GEOSCANDecoderGUI::on_lpfGain_changed(double value)
 {
     m_settings.m_lpfGain = value;
     applySettings(QStringList("lpfGain"));
+}
+
+void GEOSCANDecoderGUI::on_lpfEnabled_toggled(bool checked)
+{
+    m_settings.m_lpfEnabled = checked;
+    ui->filterCutoff->setEnabled(checked);
+    ui->filterTransition->setEnabled(checked);
+    ui->filterGain->setEnabled(checked);
+    applySettings(QStringList("lpfEnabled"));
 }
 
 void GEOSCANDecoderGUI::updateAbsoluteCenterFrequency()

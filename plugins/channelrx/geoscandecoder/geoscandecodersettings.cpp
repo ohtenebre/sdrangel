@@ -35,6 +35,7 @@ void GEOSCANDecoderSettings::resetToDefaults()
     m_filterText = "";
     m_iqRecordEnabled = false;
     m_iqWavEnabled = false;
+    m_lpfEnabled = true;
     m_lpfCutoff = 7000.0f;
     m_lpfTransition = 2000.0f;
     m_lpfGain = 0.3f;
@@ -82,6 +83,7 @@ QByteArray GEOSCANDecoderSettings::serialize() const
     s.writeReal(23, m_lpfCutoff);
     s.writeReal(24, m_lpfTransition);
     s.writeReal(25, m_lpfGain);
+    s.writeBool(41, m_lpfEnabled);
     s.writeBool(26, m_resamplerEnabled);
     s.writeS32(27, m_resamplerInputRate);
     s.writeS32(28, m_resamplerOutputRate);
@@ -145,6 +147,7 @@ bool GEOSCANDecoderSettings::deserialize(const QByteArray &data)
         d.readReal(23, &m_lpfCutoff, 7000.0f);
         d.readReal(24, &m_lpfTransition, 2000.0f);
         d.readReal(25, &m_lpfGain, 0.0045f);
+        d.readBool(41, &m_lpfEnabled, true);
         d.readBool(26, &m_resamplerEnabled, true);
         d.readS32(27, &m_resamplerInputRate, 2000000);
         d.readS32(28, &m_resamplerOutputRate, 48000);
@@ -214,6 +217,8 @@ void GEOSCANDecoderSettings::applySettings(const QStringList &settingsKeys, cons
         m_iqRecordEnabled = settings.m_iqRecordEnabled;
     if (settingsKeys.contains("iqWavEnabled"))
         m_iqWavEnabled = settings.m_iqWavEnabled;
+    if (settingsKeys.contains("lpfEnabled"))
+        m_lpfEnabled = settings.m_lpfEnabled;
     if (settingsKeys.contains("lpfCutoff"))
         m_lpfCutoff = settings.m_lpfCutoff;
 

@@ -168,6 +168,7 @@ class GEOSCANDecoderGUI : public ChannelGUI {
     void on_lpfCutoff_changed(double value);
     void on_lpfTransition_changed(double value);
     void on_lpfGain_changed(double value);
+    void on_lpfEnabled_toggled(bool checked);
 
     void on_resamplerEnabled_toggled(bool checked);
     void on_resamplerInputRate_changed(double value);

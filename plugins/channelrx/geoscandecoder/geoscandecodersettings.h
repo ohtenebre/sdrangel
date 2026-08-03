@@ -39,6 +39,7 @@ struct GEOSCANDecoderSettings
     bool m_iqRecordEnabled;
     bool m_iqWavEnabled;
 
+    bool m_lpfEnabled;
     float m_lpfCutoff;
     float m_lpfTransition;
     float m_lpfGain;

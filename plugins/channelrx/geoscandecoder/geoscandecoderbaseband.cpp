@@ -259,7 +259,7 @@ void GEOSCANDecoderBaseband::processSample(std::complex<float> s, bool iqEnabled
     if (m_lpfReset.exchange(false))
         lpf->reset();
 
-    float filtered_freq = lpf->processSample(freq);
+    float filtered_freq = m_settings.m_lpfEnabled ? lpf->processSample(freq) : freq;
 
     auto processSymbolBit = [this, iqEnabled](int hardBit, StreamState &st) -> bool
     {
@@ -596,7 +596,7 @@ void GEOSCANDecoderBaseband::applySettings(const QStringList &k, const GEOSCANDe
     else
         m_settings.applySettings(k, s);
 
-    bool updateLPF = force || k.contains("lpfCutoff") || k.contains("lpfTransition") || k.contains("lpfGain");
+    bool updateLPF = force || k.contains("lpfEnabled") || k.contains("lpfCutoff") || k.contains("lpfTransition") || k.contains("lpfGain");
     bool updateFreqShift = force || k.contains("inputFrequencyOffset");
     bool needUpdateResampler = force || k.contains("resamplerEnabled") || k.contains("resamplerInputRate") || k.contains("resamplerOutputRate");
 
