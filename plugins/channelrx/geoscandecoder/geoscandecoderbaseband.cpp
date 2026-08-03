@@ -643,14 +643,10 @@ void GEOSCANDecoderBaseband::updateResampler()
             {
                 delete m_resampler;
                 m_resampler = new FractionalResampler(ratio);
-                qWarning() << "[GEOSCAN] Resampler ratio updated:" << ratio;
             }
         }
         else
-        {
             m_resampler = new FractionalResampler(ratio);
-            qWarning() << "[GEOSCAN] Resampler enabled, ratio:" << ratio;
-        }
         m_effectiveSampleRate = m_settings.m_resamplerOutputRate;
     }
     else
@@ -659,7 +655,6 @@ void GEOSCANDecoderBaseband::updateResampler()
         {
             delete m_resampler;
             m_resampler = nullptr;
-            qWarning() << "[GEOSCAN] Resampler disabled";
         }
         m_effectiveSampleRate = m_basebandSampleRate;
     }
