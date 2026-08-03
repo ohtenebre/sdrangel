@@ -44,6 +44,11 @@ struct GEOSCANDecoderSettings
     float m_lpfTransition;
     float m_lpfGain;
 
+    bool m_aaLpfEnabled;
+    float m_aaLpfCutoff;
+    float m_aaLpfTransition;
+    float m_aaLpfGain;
+
     bool m_resamplerEnabled;
     int m_resamplerInputRate;
     int m_resamplerOutputRate;

@@ -37,6 +37,22 @@ class FIRFilter {
     }
 };
 
+// Complex low-pass FIR (two paths reuse generate_lowpass taps)
+class ComplexFIRFilter {
+  private:
+    std::vector<float> taps;
+    std::vector<std::complex<float>> delay;
+  public:
+    ComplexFIRFilter(std::vector<float> t);
+
+    std::complex<float> processSample(std::complex<float> input);
+
+    void reset()
+    {
+        std::fill(delay.begin(), delay.end(), std::complex<float>(0.0f, 0.0f));
+    }
+};
+
 class FrequencyShifter {
   private:
     float m_phase = 0.0f;

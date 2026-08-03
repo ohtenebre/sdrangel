@@ -39,6 +39,10 @@ void GEOSCANDecoderSettings::resetToDefaults()
     m_lpfCutoff = 7000.0f;
     m_lpfTransition = 2000.0f;
     m_lpfGain = 0.3f;
+    m_aaLpfEnabled = true;
+    m_aaLpfCutoff = 4800.0f;
+    m_aaLpfTransition = 4800.0f;
+    m_aaLpfGain = 1.0f;
     m_resamplerEnabled = true;
     m_resamplerInputRate = 2000000;
     m_resamplerOutputRate = 48000;
@@ -84,6 +88,10 @@ QByteArray GEOSCANDecoderSettings::serialize() const
     s.writeReal(24, m_lpfTransition);
     s.writeReal(25, m_lpfGain);
     s.writeBool(41, m_lpfEnabled);
+    s.writeBool(42, m_aaLpfEnabled);
+    s.writeReal(43, m_aaLpfCutoff);
+    s.writeReal(44, m_aaLpfTransition);
+    s.writeReal(45, m_aaLpfGain);
     s.writeBool(26, m_resamplerEnabled);
     s.writeS32(27, m_resamplerInputRate);
     s.writeS32(28, m_resamplerOutputRate);
@@ -148,6 +156,10 @@ bool GEOSCANDecoderSettings::deserialize(const QByteArray &data)
         d.readReal(24, &m_lpfTransition, 2000.0f);
         d.readReal(25, &m_lpfGain, 0.0045f);
         d.readBool(41, &m_lpfEnabled, true);
+        d.readBool(42, &m_aaLpfEnabled, true);
+        d.readReal(43, &m_aaLpfCutoff, 4800.0f);
+        d.readReal(44, &m_aaLpfTransition, 4800.0f);
+        d.readReal(45, &m_aaLpfGain, 1.0f);
         d.readBool(26, &m_resamplerEnabled, true);
         d.readS32(27, &m_resamplerInputRate, 2000000);
         d.readS32(28, &m_resamplerOutputRate, 48000);
@@ -227,6 +239,15 @@ void GEOSCANDecoderSettings::applySettings(const QStringList &settingsKeys, cons
 
     if (settingsKeys.contains("lpfGain"))
         m_lpfGain = settings.m_lpfGain;
+
+    if (settingsKeys.contains("aaLpfEnabled"))
+        m_aaLpfEnabled = settings.m_aaLpfEnabled;
+    if (settingsKeys.contains("aaLpfCutoff"))
+        m_aaLpfCutoff = settings.m_aaLpfCutoff;
+    if (settingsKeys.contains("aaLpfTransition"))
+        m_aaLpfTransition = settings.m_aaLpfTransition;
+    if (settingsKeys.contains("aaLpfGain"))
+        m_aaLpfGain = settings.m_aaLpfGain;
 
     if (settingsKeys.contains("resamplerEnabled"))
         m_resamplerEnabled = settings.m_resamplerEnabled;

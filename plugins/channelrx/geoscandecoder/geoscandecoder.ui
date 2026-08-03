@@ -820,6 +820,133 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_14">
       <item>
+       <widget class="QGroupBox" name="aaFilterGroup">
+        <property name="title">
+         <string>АА ФНЧ</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_aa">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_aa">
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayout_aa_transition">
+             <item>
+              <widget class="QLabel" name="label_aa_t">
+               <property name="text">
+                <string>Переход, Гц</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QDoubleSpinBox" name="aaFilterTransition">
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+               <property name="decimals">
+                <number>0</number>
+               </property>
+               <property name="minimum">
+                <double>100.000000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>20000.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>500.000000000000000</double>
+               </property>
+               <property name="value">
+                <double>4800.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayout_aa_cutoff">
+             <item>
+              <widget class="QLabel" name="label_aa_c">
+               <property name="text">
+                <string>Срез, Гц</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QDoubleSpinBox" name="aaFilterCutoff">
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+               <property name="decimals">
+                <number>0</number>
+               </property>
+               <property name="minimum">
+                <double>100.000000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>20000.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>500.000000000000000</double>
+               </property>
+               <property name="value">
+                <double>4800.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayout_aa_gain">
+             <item>
+              <widget class="QLabel" name="label_aa_g">
+               <property name="text">
+                <string>Усиление</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QDoubleSpinBox" name="aaFilterGain">
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+               <property name="decimals">
+                <number>5</number>
+               </property>
+               <property name="maximum">
+                <double>1.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.100000000000000</double>
+               </property>
+               <property name="value">
+                <double>1.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
        <widget class="QGroupBox" name="groupBox_2">
         <property name="title">
          <string>Ресемплер</string>

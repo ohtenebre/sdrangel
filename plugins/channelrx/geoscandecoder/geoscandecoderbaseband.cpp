@@ -37,7 +37,7 @@ MESSAGE_CLASS_DEFINITION(GEOSCANDecoderBaseband::MsgTelemetry, Message)
 MESSAGE_CLASS_DEFINITION(GEOSCANDecoderBaseband::MsgDebugText, Message)
 MESSAGE_CLASS_DEFINITION(GEOSCANDecoderBaseband::MsgImageData, Message)
 
-GEOSCANDecoderBaseband::GEOSCANDecoderBaseband() : m_lpf(std::make_shared<FIRFilter>(generate_lowpass(0.0045f, 48000.f, 7000.f, 2000.f))), m_messageQueueToGUI(nullptr), m_basebandSampleRate(48000), m_effectiveSampleRate(48000)
+GEOSCANDecoderBaseband::GEOSCANDecoderBaseband() : m_lpf(std::make_shared<FIRFilter>(generate_lowpass(0.0045f, 48000.f, 7000.f, 2000.f))), m_aaFilter(std::make_shared<ComplexFIRFilter>(generate_lowpass(1.0f, 48000.f, 4800.f, 4800.f))), m_messageQueueToGUI(nullptr), m_basebandSampleRate(48000), m_effectiveSampleRate(48000)
 {
     m_freqShifter.setFrequency(-(float)m_settings.m_inputFrequencyOffset, (float)m_basebandSampleRate);
 
@@ -191,6 +191,7 @@ void GEOSCANDecoderBaseband::feed(const SampleVector::const_iterator &b, const S
     }
 
     std::shared_ptr<FIRFilter> lpf = std::atomic_load(&m_lpf);
+    std::shared_ptr<ComplexFIRFilter> aaFilter = std::atomic_load(&m_aaFilter);
     int wavAppendCount = 0;
 
     for (auto it = b; it != e; ++it)
@@ -201,8 +202,9 @@ void GEOSCANDecoderBaseband::feed(const SampleVector::const_iterator &b, const S
 
         if (r)
         {
+            std::complex<float> filtered = m_settings.m_aaLpfEnabled ? aaFilter->processSample(s) : s;
             std::complex<float> resampled[4];
-            int n = r->processSample(s, resampled, 4);
+            int n = r->processSample(filtered, resampled, 4);
             for (int i = 0; i < n; i++)
             {
                 processSample(resampled[i], iqEnabled, lpf);
@@ -580,6 +582,7 @@ void GEOSCANDecoderBaseband::handleInputMessages()
 
             m_mutex.lock();
             std::atomic_store(&m_lpf, std::make_shared<FIRFilter>(generate_lowpass(m_settings.m_lpfGain, (float)m_effectiveSampleRate, m_settings.m_lpfCutoff, m_settings.m_lpfTransition)));
+            std::atomic_store(&m_aaFilter, std::make_shared<ComplexFIRFilter>(generate_lowpass(m_settings.m_aaLpfGain, (float)m_basebandSampleRate, m_settings.m_aaLpfCutoff, m_settings.m_aaLpfTransition)));
             m_freqShifter.setFrequency(-(float)m_settings.m_inputFrequencyOffset, (float)m_basebandSampleRate);
             m_mutex.unlock();
         }
@@ -597,12 +600,18 @@ void GEOSCANDecoderBaseband::applySettings(const QStringList &k, const GEOSCANDe
         m_settings.applySettings(k, s);
 
     bool updateLPF = force || k.contains("lpfEnabled") || k.contains("lpfCutoff") || k.contains("lpfTransition") || k.contains("lpfGain");
+    bool updateAALPF = force || k.contains("aaLpfEnabled") || k.contains("aaLpfCutoff") || k.contains("aaLpfTransition") || k.contains("aaLpfGain");
     bool updateFreqShift = force || k.contains("inputFrequencyOffset");
     bool needUpdateResampler = force || k.contains("resamplerEnabled") || k.contains("resamplerInputRate") || k.contains("resamplerOutputRate");
 
     if (updateLPF)
     {
         std::atomic_store(&m_lpf, std::make_shared<FIRFilter>(generate_lowpass(m_settings.m_lpfGain, (float)m_effectiveSampleRate, m_settings.m_lpfCutoff, m_settings.m_lpfTransition)));
+    }
+
+    if (updateAALPF)
+    {
+        std::atomic_store(&m_aaFilter, std::make_shared<ComplexFIRFilter>(generate_lowpass(m_settings.m_aaLpfGain, (float)m_basebandSampleRate, m_settings.m_aaLpfCutoff, m_settings.m_aaLpfTransition)));
     }
 
     if (updateFreqShift)

@@ -62,6 +62,7 @@ class GEOSCANDecoderBaseband : public QObject {
 
     std::shared_ptr<FIRFilter> m_lpf;
     std::atomic<bool> m_lpfReset{ false };
+    std::shared_ptr<ComplexFIRFilter> m_aaFilter;
 
     class MsgConfigureGEOSCANDecoderBaseband : public Message {
         MESSAGE_CLASS_DECLARATION

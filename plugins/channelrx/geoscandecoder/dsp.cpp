@@ -72,6 +72,27 @@ float FIRFilter::processSample(float input)
     return acc;
 }
 
+ComplexFIRFilter::ComplexFIRFilter(std::vector<float> t)
+    : taps(std::move(t)),
+      delay(taps.size(), std::complex<float>(0.0f, 0.0f))
+{
+}
+
+std::complex<float> ComplexFIRFilter::processSample(std::complex<float> input)
+{
+    for (size_t i = delay.size() - 1; i > 0; i--)
+        delay[i] = delay[i - 1];
+
+    delay[0] = input;
+
+    std::complex<float> acc(0.0f, 0.0f);
+
+    for (size_t i = 0; i < taps.size(); i++)
+        acc += delay[i] * taps[i];
+
+    return acc;
+}
+
 int FractionalResampler::processSample(std::complex<float> sample, std::complex<float> *outputs, int maxOutputs)
 {
     d_buffer[d_bufPos] = sample;
