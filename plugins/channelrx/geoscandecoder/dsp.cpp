@@ -1,6 +1,15 @@
 #include "dsp.hpp"
 
+#include <algorithm>
 #include <cmath>
+
+static size_t nextPow2(size_t n)
+{
+    size_t p = 1;
+    while (p < n)
+        p <<= 1;
+    return p;
+}
 
 // Generate low-pass FIR filter coefficients — matches GNU Radio firdes::low_pass() with Blackman window
 std::vector<float> generate_lowpass(
@@ -28,7 +37,7 @@ std::vector<float> generate_lowpass(
     {
         int idx = n + M;
         double w = 0.42 - 0.5 * cos(2.0 * M_PI * idx / (ntaps - 1))
-                        + 0.08 * cos(4.0 * M_PI * idx / (ntaps - 1));
+                   + 0.08 * cos(4.0 * M_PI * idx / (ntaps - 1));
 
         double v;
         if (n == 0)
@@ -74,23 +83,41 @@ float FIRFilter::processSample(float input)
 
 ComplexFIRFilter::ComplexFIRFilter(std::vector<float> t)
     : taps(std::move(t)),
-      delay(taps.size(), std::complex<float>(0.0f, 0.0f))
+      delay(nextPow2(taps.size()), std::complex<float>(0.0f, 0.0f)),
+      m_mask(delay.size() - 1)
 {
+    std::reverse(taps.begin(), taps.end());
 }
 
 std::complex<float> ComplexFIRFilter::processSample(std::complex<float> input)
 {
-    for (size_t i = delay.size() - 1; i > 0; i--)
-        delay[i] = delay[i - 1];
+    delay[m_idx] = input;
+    m_idx = (m_idx + 1) & m_mask;
 
-    delay[0] = input;
+    const size_t N = taps.size();
+    float *__restrict d = reinterpret_cast<float *>(delay.data());
+    const float *__restrict t = taps.data();
 
-    std::complex<float> acc(0.0f, 0.0f);
+    float accRe = 0.0f;
+    float accIm = 0.0f;
 
-    for (size_t i = 0; i < taps.size(); i++)
-        acc += delay[i] * taps[i];
+    const size_t seg1 = std::min(N, m_mask + 1 - m_idx);
+    size_t i = 0;
 
-    return acc;
+    for (; i < seg1; i++)
+    {
+        const float tap = t[i];
+        accRe += d[2 * (m_idx + i)] * tap;
+        accIm += d[2 * (m_idx + i) + 1] * tap;
+    }
+    for (; i < N; i++)
+    {
+        const float tap = t[i];
+        accRe += d[2 * (i - seg1)] * tap;
+        accIm += d[2 * (i - seg1) + 1] * tap;
+    }
+
+    return std::complex<float>(accRe, accIm);
 }
 
 int FractionalResampler::processSample(std::complex<float> sample, std::complex<float> *outputs, int maxOutputs)
@@ -141,8 +168,7 @@ int FractionalResampler::processSample(std::complex<float> sample, std::complex<
 // Based on GNU Radio clock_tracking_loop (GPL-3.0)
 // https://github.com/gnuradio/gnuradio/blob/main/gr-digital/lib/clock_tracking_loop.h
 
-ClockTrackingLoop::ClockTrackingLoop(float loop_bw, float max_period, float min_period,
-                                     float nominal_period, float damping, float ted_gain)
+ClockTrackingLoop::ClockTrackingLoop(float loop_bw, float max_period, float min_period, float nominal_period, float damping, float ted_gain)
     : d_avg_period(nominal_period),
       d_max_avg_period(max_period),
       d_min_avg_period(min_period),
@@ -179,19 +205,19 @@ void ClockTrackingLoop::update_gains()
         float omega_d_T = omega_n_T * sqrtf(d_zeta * d_zeta - 1.0f);
         float cosx_omega_d_T = coshf(omega_d_T);
         alpha = k0 * k1 * sinh_zeta_omega_n_T;
-        beta  = k0 * (1.0f - k1 * (sinh_zeta_omega_n_T + cosx_omega_d_T));
+        beta = k0 * (1.0f - k1 * (sinh_zeta_omega_n_T + cosx_omega_d_T));
     }
     else if (d_zeta == 1.0f)
     {
         alpha = k0 * k1 * sinh_zeta_omega_n_T;
-        beta  = k0 * (1.0f - k1 * (sinh_zeta_omega_n_T + 1.0f));
+        beta = k0 * (1.0f - k1 * (sinh_zeta_omega_n_T + 1.0f));
     }
     else
     {
         float omega_d_T = omega_n_T * sqrtf(1.0f - d_zeta * d_zeta);
         float cosx_omega_d_T = cosf(omega_d_T);
         alpha = k0 * k1 * sinh_zeta_omega_n_T;
-        beta  = k0 * (1.0f - k1 * (sinh_zeta_omega_n_T + cosx_omega_d_T));
+        beta = k0 * (1.0f - k1 * (sinh_zeta_omega_n_T + cosx_omega_d_T));
     }
 
     d_alpha = alpha;
@@ -224,15 +250,10 @@ void ClockTrackingLoop::set_nom_avg_period(float period)
         d_nom_avg_period = period;
 }
 
-// SymbolSync 
+// SymbolSync
 
 SymbolSync::SymbolSync(float sps, float loop_bw, float damping, float ted_gain, float max_dev)
-    : d_clock(loop_bw,
-              sps * (1.0f + max_dev),
-              sps * (1.0f - max_dev),
-              sps,
-              damping,
-              ted_gain),
+    : d_clock(loop_bw, sps * (1.0f + max_dev), sps * (1.0f - max_dev), sps, damping, ted_gain),
       d_sps(sps),
       d_prev_on_time(0.0f),
       d_ted_initialized(false),

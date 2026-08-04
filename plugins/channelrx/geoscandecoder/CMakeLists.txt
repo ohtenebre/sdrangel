@@ -96,7 +96,7 @@ target_link_libraries(${TARGET_NAME} PRIVATE
 )
 
 target_compile_options(${TARGET_NAME} PRIVATE 
-    -g
+    -O3 -march=native
     -ffast-math
     -march=native
 )

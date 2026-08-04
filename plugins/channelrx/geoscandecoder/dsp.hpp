@@ -37,11 +37,13 @@ class FIRFilter {
     }
 };
 
-// Complex low-pass FIR (two paths reuse generate_lowpass taps)
+// Complex low-pass FIR with ring-buffer delay line (no per-sample shift)
 class ComplexFIRFilter {
   private:
     std::vector<float> taps;
     std::vector<std::complex<float>> delay;
+    size_t m_mask = 0;
+    size_t m_idx = 0;
   public:
     ComplexFIRFilter(std::vector<float> t);
 
@@ -50,6 +52,7 @@ class ComplexFIRFilter {
     void reset()
     {
         std::fill(delay.begin(), delay.end(), std::complex<float>(0.0f, 0.0f));
+        m_idx = 0;
     }
 };
 
@@ -99,7 +102,6 @@ class FractionalResampler {
     std::complex<float> d_buffer[NTAPS] = {};
     int d_bufPos = 0;
     int d_bufCount = 0;
-
   public:
     FractionalResampler(double ratio) : d_mu(0.0), d_ratio(ratio), d_accum(0.0) {}
 
@@ -131,10 +133,8 @@ class ClockTrackingLoop {
     float d_alpha; // proportional gain (gain_mu)
     float d_beta;  // integral gain (gain_omega)
     float d_prev_avg_period, d_prev_inst_period, d_prev_phase;
-
   public:
-    ClockTrackingLoop(float loop_bw, float max_period, float min_period,
-                      float nominal_period, float damping, float ted_gain);
+    ClockTrackingLoop(float loop_bw, float max_period, float min_period, float nominal_period, float damping, float ted_gain);
 
     void update_gains();
 
@@ -181,24 +181,36 @@ class ClockTrackingLoop {
     void set_loop_bandwidth(float bw);
     void set_damping_factor(float df);
     void set_ted_gain(float g);
-    void set_avg_period(float p)  { d_avg_period = p; d_prev_avg_period = p; }
-    void set_inst_period(float p) { d_inst_period = p; d_prev_inst_period = p; }
-    void set_phase(float p)       { d_phase = p; d_prev_phase = p; }
+    void set_avg_period(float p)
+    {
+        d_avg_period = p;
+        d_prev_avg_period = p;
+    }
+    void set_inst_period(float p)
+    {
+        d_inst_period = p;
+        d_prev_inst_period = p;
+    }
+    void set_phase(float p)
+    {
+        d_phase = p;
+        d_prev_phase = p;
+    }
     void set_max_avg_period(float p) { d_max_avg_period = p; }
     void set_min_avg_period(float p) { d_min_avg_period = p; }
     void set_nom_avg_period(float p);
 
-    float get_loop_bandwidth() const  { return d_omega_n_norm; }
-    float get_damping_factor() const  { return d_zeta; }
-    float get_ted_gain() const        { return d_ted_gain; }
-    float get_alpha() const           { return d_alpha; }
-    float get_beta() const            { return d_beta; }
-    float get_avg_period() const      { return d_avg_period; }
-    float get_inst_period() const     { return d_inst_period; }
-    float get_phase() const           { return d_phase; }
-    float get_max_avg_period() const  { return d_max_avg_period; }
-    float get_min_avg_period() const  { return d_min_avg_period; }
-    float get_nom_avg_period() const  { return d_nom_avg_period; }
+    float get_loop_bandwidth() const { return d_omega_n_norm; }
+    float get_damping_factor() const { return d_zeta; }
+    float get_ted_gain() const { return d_ted_gain; }
+    float get_alpha() const { return d_alpha; }
+    float get_beta() const { return d_beta; }
+    float get_avg_period() const { return d_avg_period; }
+    float get_inst_period() const { return d_inst_period; }
+    float get_phase() const { return d_phase; }
+    float get_max_avg_period() const { return d_max_avg_period; }
+    float get_min_avg_period() const { return d_min_avg_period; }
+    float get_nom_avg_period() const { return d_nom_avg_period; }
 };
 
 // Symbol timing recovery using Gardner TED (streaming)
@@ -215,7 +227,6 @@ class SymbolSync {
 
     std::vector<float> d_buf;
     size_t d_idx;
-
   public:
     SymbolSync(float sps, float loop_bw, float damping, float ted_gain, float max_dev);
 
