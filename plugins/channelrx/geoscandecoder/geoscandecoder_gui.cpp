@@ -334,6 +334,7 @@ void GEOSCANDecoderGUI::displaySettings()
     if (m_observerLat) m_observerLat->setValue(m_settings.m_observerLat);
     if (m_observerLon) m_observerLon->setValue(m_settings.m_observerLon);
     if (m_observerAlt) m_observerAlt->setValue(m_settings.m_observerAltM);
+    ui->dopplerEnabled->setChecked(m_settings.m_dopplerEnabled);
     updateAbsoluteCenterFrequency();
     highlightSearchMatches();
 }
@@ -344,6 +345,7 @@ void GEOSCANDecoderGUI::makeUIConnections()
     QObject::connect(m_satFreq, &QLineEdit::editingFinished, this, &GEOSCANDecoderGUI::on_satFreq_editingFinished);
     QObject::connect(ui->tleButton, &QPushButton::clicked, this, &GEOSCANDecoderGUI::onTleButtonClicked);
     QObject::connect(ui->satelliteCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &GEOSCANDecoderGUI::onSatelliteChanged);
+    QObject::connect(ui->dopplerEnabled, &QCheckBox::toggled, this, &GEOSCANDecoderGUI::on_dopplerEnabled_toggled);
     QObject::connect(ui->clearTable, &QPushButton::clicked, this, &GEOSCANDecoderGUI::onClearLog);
     QObject::connect(ui->logFilename, &QToolButton::clicked, this, &GEOSCANDecoderGUI::on_logFilename_clicked);
     QObject::connect(ui->logEnable, &ButtonSwitch::clicked, this, &GEOSCANDecoderGUI::on_logEnable_toggled);
@@ -493,9 +495,28 @@ void GEOSCANDecoderGUI::onSatelliteChanged(int index)
     m_dopplerTimer->start();
     updateDoppler();
 }
+void GEOSCANDecoderGUI::on_dopplerEnabled_toggled(bool checked)
+{
+    m_settings.m_dopplerEnabled = checked;
+    applySettings(QStringList("dopplerEnabled"));
+
+    if (checked)
+    {
+        if (m_tleActive)
+        {
+            m_dopplerTimer->start();
+            updateDoppler();
+        }
+    }
+    else
+    {
+        m_dopplerTimer->stop();
+        ui->deltaFrequency->setValue(0);
+    }
+}
 void GEOSCANDecoderGUI::updateDoppler()
 {
-    if (!m_tleActive)
+    if (!m_tleActive || !m_settings.m_dopplerEnabled)
         return;
 
     bool ok = false;

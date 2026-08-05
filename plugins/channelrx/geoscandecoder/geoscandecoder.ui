@@ -71,19 +71,29 @@
           </property>
          </widget>
         </item>
-        <item>
-         <widget class="QComboBox" name="satelliteCombo">
-          <property name="currentText">
-           <string>выберите спутник</string>
-          </property>
-          <item>
-           <property name="text">
+         <item>
+          <widget class="QComboBox" name="satelliteCombo">
+           <property name="currentText">
             <string>выберите спутник</string>
            </property>
-          </item>
-         </widget>
-        </item>
-       </layout>
+           <item>
+            <property name="text">
+             <string>выберите спутник</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="dopplerEnabled">
+           <property name="text">
+            <string>Доплер</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
       </item>
       <item>
        <widget class="QLineEdit" name="tleFileEdit">

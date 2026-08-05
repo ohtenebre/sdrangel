@@ -57,6 +57,7 @@ void GEOSCANDecoderSettings::resetToDefaults()
     m_observerLat = 0.0f;
     m_observerLon = 0.0f;
     m_observerAltM = 0.0f;
+    m_dopplerEnabled = true;
 }
 
 QByteArray GEOSCANDecoderSettings::serialize() const
@@ -107,6 +108,7 @@ QByteArray GEOSCANDecoderSettings::serialize() const
     s.writeReal(38, m_observerLon);
     s.writeReal(39, m_observerAltM);
     s.writeBool(40, m_iqWavEnabled);
+    s.writeBool(46, m_dopplerEnabled);
     return s.final();
 }
 
@@ -175,6 +177,7 @@ bool GEOSCANDecoderSettings::deserialize(const QByteArray &data)
         d.readReal(38, &m_observerLon, 0.0);
         d.readReal(39, &m_observerAltM, 0.0);
         d.readBool(40, &m_iqWavEnabled, false);
+        d.readBool(46, &m_dopplerEnabled, true);
         return true;
     }
     resetToDefaults();
@@ -278,6 +281,8 @@ void GEOSCANDecoderSettings::applySettings(const QStringList &settingsKeys, cons
         m_observerLon = settings.m_observerLon;
     if (settingsKeys.contains("observerAltM"))
         m_observerAltM = settings.m_observerAltM;
+    if (settingsKeys.contains("dopplerEnabled"))
+        m_dopplerEnabled = settings.m_dopplerEnabled;
 }
 
 QString GEOSCANDecoderSettings::getDebugString(const QStringList &settingsKeys, bool force) const

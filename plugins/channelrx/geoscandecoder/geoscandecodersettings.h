@@ -66,6 +66,7 @@ struct GEOSCANDecoderSettings
     float m_observerLat;
     float m_observerLon;
     float m_observerAltM;
+    bool m_dopplerEnabled;
 
     GEOSCANDecoderSettings();
     void resetToDefaults();

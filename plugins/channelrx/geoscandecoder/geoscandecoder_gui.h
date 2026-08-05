@@ -130,6 +130,7 @@ class GEOSCANDecoderGUI : public ChannelGUI {
     void tick();
     void onTleButtonClicked();
     void onSatelliteChanged(int index);
+    void on_dopplerEnabled_toggled(bool checked);
     void onClearLog();
     void on_logFilename_clicked();
     void on_logEnable_toggled(bool checked);
