@@ -224,11 +224,12 @@ void GEOSCANDecoderBaseband::feed(const SampleVector::const_iterator &b, const S
         }
         else
         {
-            processSample(s, iqEnabled, lpf);
+            std::complex<float> filtered = m_settings.m_aaLpfEnabled ? aaFilter->processSample(s) : s;
+            processSample(filtered, iqEnabled, lpf);
             if (wavEnabled && m_wavActive)
             {
-                int32_t ii = (int32_t)s.real();
-                int32_t qq = (int32_t)s.imag();
+                int32_t ii = (int32_t)filtered.real();
+                int32_t qq = (int32_t)filtered.imag();
                 ii = std::clamp(ii, (int32_t)-32768, (int32_t)32767);
                 qq = std::clamp(qq, (int32_t)-32768, (int32_t)32767);
                 int16_t si = (int16_t)ii;
