@@ -472,6 +472,10 @@ void GEOSCANDecoderBaseband::processPacket(std::vector<uint8_t> &packet, bool in
     tel.control = packet[14];
     tel.pid = packet[15];
 
+    // Телеметрию выводим только для пакетов с адресом назначения BEACON
+    if (tel.destinationCallsign.section('-', 0, 0) != "BEACON")
+        return;
+
     tel.mayakId = packet[16];
     tel.timestamp = packet[17] | (packet[18] << 8) | (packet[19] << 16) | (packet[20] << 24);
     tel.epsMode = packet[21];
