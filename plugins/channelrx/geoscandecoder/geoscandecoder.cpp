@@ -142,6 +142,12 @@ bool GEOSCANDecoder::handleMessage(const Message& cmd)
 
         return true;
     }
+    else if (GEOSCANDecoderBaseband::MsgResetDsp::match(cmd))
+    {
+        if (m_running)
+            m_basebandSink->getInputMessageQueue()->push(GEOSCANDecoderBaseband::MsgResetDsp::create());
+        return true;
+    }
     else if (MainCore::MsgChannelDemodQuery::match(cmd))
     {
         return true;

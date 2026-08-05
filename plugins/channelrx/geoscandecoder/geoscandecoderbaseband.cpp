@@ -35,6 +35,7 @@ MESSAGE_CLASS_DEFINITION(GEOSCANDecoderBaseband::MsgPacketFound, Message)
 MESSAGE_CLASS_DEFINITION(GEOSCANDecoderBaseband::MsgSignalReport, Message)
 MESSAGE_CLASS_DEFINITION(GEOSCANDecoderBaseband::MsgTelemetry, Message)
 MESSAGE_CLASS_DEFINITION(GEOSCANDecoderBaseband::MsgDebugText, Message)
+MESSAGE_CLASS_DEFINITION(GEOSCANDecoderBaseband::MsgResetDsp, Message)
 MESSAGE_CLASS_DEFINITION(GEOSCANDecoderBaseband::MsgImageData, Message)
 
 GEOSCANDecoderBaseband::GEOSCANDecoderBaseband() : m_lpf(std::make_shared<FIRFilter>(generate_lowpass(0.0045f, 48000.f, 7000.f, 2000.f))), m_aaFilter(std::make_shared<ComplexFIRFilter>(generate_lowpass(1.0f, 48000.f, 6000.f, 6000.f))), m_messageQueueToGUI(nullptr), m_basebandSampleRate(48000), m_effectiveSampleRate(48000)
@@ -575,6 +576,10 @@ void GEOSCANDecoderBaseband::handleInputMessages()
             m_freqShifter.setFrequency(-(float)m_settings.m_inputFrequencyOffset, (float)m_basebandSampleRate);
             m_mutex.unlock();
         }
+        else if (MsgResetDsp::match(*m))
+        {
+            resetDsp();
+        }
         delete m;
     }
 }
@@ -608,6 +613,25 @@ void GEOSCANDecoderBaseband::applySettings(const QStringList &k, const GEOSCANDe
     if (force || k.contains("symSyncType") || k.contains("symSyncSps") || k.contains("symSyncLoopBw") || k.contains("symSyncDamping") || k.contains("symSyncTedGain") || k.contains("symSyncMaxDev"))
         updateSymbolSync();
 
+    m_mutex.unlock();
+}
+
+void GEOSCANDecoderBaseband::resetDsp()
+{
+    m_mutex.lock();
+    m_lpfReset = true;
+    if (m_aaFilter)
+        m_aaFilter->reset();
+    if (m_resampler)
+        m_resampler->reset();
+    m_prevSample = 0;
+    m_sampleCount = 0;
+    m_lastPacketSampleCount = 0;
+    m_lastPacketWasCrcOk = false;
+    m_lastImageChunkSample.clear();
+    if (m_symbolSync)
+        m_symbolSync->reset();
+    m_symStream = StreamState();
     m_mutex.unlock();
 }
 

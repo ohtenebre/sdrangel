@@ -870,22 +870,19 @@ void GEOSCANDecoderGUI::onClearLog()
     m_frameCrcOk = 0;
     m_extraSelections.clear();
     m_lastHighlightedPosition = 0;
-    for (auto it = m_imageBuffers.begin(); it != m_imageBuffers.end(); ++it)
-    {
-        if (!it.value().isEmpty())
-        {
-            uint32_t inst = m_settings.m_mergeMode ? 0 : m_imageInstance.value(it.key()) + 1;
-            saveImage(it.key(), it.value(), inst);
-        }
-    }
     m_imageBuffers.clear();
     m_imageRxCount.clear();
+    m_imageInstance.clear();
+    m_imageChunkCount.clear();
+    m_lastActiveImageId = 0;
     ui->imageLabel->clear();
     ui->imageLabel->setText("Принимаемое изображение");
     setStatusText("Синхр: 0 | CRC OK: 0");
     if (m_telemetryTree)
         m_telemetryTree->clear();
     m_packetNumber = 0;
+
+    m_geoscandecoder->getInputMessageQueue()->push(GEOSCANDecoderBaseband::MsgResetDsp::create());
 }
 
 void GEOSCANDecoderGUI::handleInputMessages()

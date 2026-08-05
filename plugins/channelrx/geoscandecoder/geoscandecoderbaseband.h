@@ -132,6 +132,14 @@ class GEOSCANDecoderBaseband : public QObject {
         TelemetryData m_data;
     };
 
+    class MsgResetDsp : public Message {
+        MESSAGE_CLASS_DECLARATION
+      public:
+        static MsgResetDsp *create() { return new MsgResetDsp(); }
+      private:
+        MsgResetDsp() {}
+    };
+
     class MsgImageData : public Message {
         MESSAGE_CLASS_DECLARATION
       public:
@@ -180,6 +188,7 @@ class GEOSCANDecoderBaseband : public QObject {
     void handleData();
   private:
     void applySettings(const QStringList &keys, const GEOSCANDecoderSettings &settings, bool force);
+    void resetDsp();
     void processSample(std::complex<float> s, bool iqEnabled, std::shared_ptr<FIRFilter> lpf);
     void processPacket(std::vector<uint8_t> &packet, bool inverted);
     bool checkCRC16(const std::vector<uint8_t> &data);
