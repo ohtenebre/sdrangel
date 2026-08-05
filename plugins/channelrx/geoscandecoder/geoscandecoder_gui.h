@@ -6,19 +6,19 @@
 #include "dsp/dsptypes.h"
 #include "geoscandecoderbaseband.h"
 #include "geoscandecodersettings.h"
-#include "util/messagequeue.h"
 #include "tle_utils.hpp"
+#include "util/messagequeue.h"
 
+#include <QDialog>
 #include <QDir>
+#include <QDoubleSpinBox>
 #include <QFile>
+#include <QLineEdit>
 #include <QMap>
 #include <QPixmap>
 #include <QTextEdit>
-#include <QLineEdit>
-#include <QTreeWidget>
-#include <QDialog>
 #include <QTimer>
-#include <QDoubleSpinBox>
+#include <QTreeWidget>
 
 class PluginAPI;
 class DeviceUISet;

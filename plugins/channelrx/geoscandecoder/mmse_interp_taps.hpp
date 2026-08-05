@@ -10,7 +10,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  *
  * This file was copied and adapted for use in <your project name>.
-*/
+ */
 namespace dsp_detail
 {
     static constexpr int NTAPS = 8;

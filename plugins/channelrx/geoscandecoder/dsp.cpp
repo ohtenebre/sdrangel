@@ -12,12 +12,7 @@ static size_t nextPow2(size_t n)
 }
 
 // Generate low-pass FIR filter coefficients — matches GNU Radio firdes::low_pass() with Blackman window
-std::vector<float> generate_lowpass(
-    float gain,
-    float sample_rate,
-    float cutoff,
-    float transition
-)
+std::vector<float> generate_lowpass(float gain, float sample_rate, float cutoff, float transition)
 {
     double sr = sample_rate;
     double tr = transition;
@@ -60,11 +55,7 @@ std::vector<float> generate_lowpass(
     return taps;
 }
 
-FIRFilter::FIRFilter(std::vector<float> t)
-    : taps(std::move(t)),
-      delay(taps.size(), 0)
-{
-}
+FIRFilter::FIRFilter(std::vector<float> t) : taps(std::move(t)), delay(taps.size(), 0) {}
 
 float FIRFilter::processSample(float input)
 {
@@ -81,10 +72,7 @@ float FIRFilter::processSample(float input)
     return acc;
 }
 
-ComplexFIRFilter::ComplexFIRFilter(std::vector<float> t)
-    : taps(std::move(t)),
-      delay(nextPow2(taps.size()), std::complex<float>(0.0f, 0.0f)),
-      m_mask(delay.size() - 1)
+ComplexFIRFilter::ComplexFIRFilter(std::vector<float> t) : taps(std::move(t)), delay(nextPow2(taps.size()), std::complex<float>(0.0f, 0.0f)), m_mask(delay.size() - 1)
 {
     std::reverse(taps.begin(), taps.end());
 }
@@ -251,7 +239,6 @@ void ClockTrackingLoop::set_nom_avg_period(float period)
 }
 
 // SymbolSync
-
 SymbolSync::SymbolSync(float sps, float loop_bw, float damping, float ted_gain, float max_dev)
     : d_clock(loop_bw, sps * (1.0f + max_dev), sps * (1.0f - max_dev), sps, damping, ted_gain),
       d_sps(sps),

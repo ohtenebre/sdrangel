@@ -19,36 +19,35 @@
 #ifndef INCLUDE_GEOSCANDECODERPLUGIN_H
 #define INCLUDE_GEOSCANDECODERPLUGIN_H
 
-#include <QObject>
 #include "plugin/plugininterface.h"
+
+#include <QObject>
+
 
 class DeviceUISet;
 class BasebandSampleSink;
 
 class GEOSCANDecoderPlugin : public QObject, PluginInterface {
-	Q_OBJECT
-	Q_INTERFACES(PluginInterface)
+    Q_OBJECT
+    Q_INTERFACES(PluginInterface)
     Q_PLUGIN_METADATA(IID "sdrangel.channel.geoscandecoder")
+  public:
+    explicit GEOSCANDecoderPlugin(QObject *parent = NULL);
 
-public:
-    explicit GEOSCANDecoderPlugin(QObject* parent = NULL);
+    const PluginDescriptor &getPluginDescriptor() const;
+    void initPlugin(PluginAPI *pluginAPI);
 
-	const PluginDescriptor& getPluginDescriptor() const;
-	void initPlugin(PluginAPI* pluginAPI);
-
-	virtual void createRxChannel(DeviceAPI *deviceAPI, BasebandSampleSink **bs, ChannelAPI **cs) const;
-	virtual ChannelGUI* createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const;
-    virtual ChannelWebAPIAdapter* createChannelWebAPIAdapter() const;
+    virtual void createRxChannel(DeviceAPI *deviceAPI, BasebandSampleSink **bs, ChannelAPI **cs) const;
+    virtual ChannelGUI *createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const;
+    virtual ChannelWebAPIAdapter *createChannelWebAPIAdapter() const;
 
     // статические идентификаторы для регистрации
-    static constexpr const char* m_channelIdURI = "sdrangel.channel.geoscandecoder";
-    static constexpr const char* m_channelId = "GEOSCAN SATELLITES DECODER";
+    static constexpr const char *m_channelIdURI = "sdrangel.channel.geoscandecoder";
+    static constexpr const char *m_channelId = "GEOSCAN SATELLITES DECODER";
+  private:
+    static const PluginDescriptor m_pluginDescriptor;
 
-
-private:
-	static const PluginDescriptor m_pluginDescriptor;
-
-	PluginAPI* m_pluginAPI;
+    PluginAPI *m_pluginAPI;
 };
 
 #endif // INCLUDE_GEOSCANDECODERPLUGIN_H

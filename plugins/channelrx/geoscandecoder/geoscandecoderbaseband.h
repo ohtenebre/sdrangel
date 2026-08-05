@@ -16,8 +16,8 @@
 #include <QTimer>
 #include <atomic>
 #include <complex>
-#include <vector>
 #include <memory>
+#include <vector>
 
 class GEOSCANDecoderBaseband : public QObject {
     Q_OBJECT
@@ -138,7 +138,9 @@ class GEOSCANDecoderBaseband : public QObject {
         MsgImageData(uint16_t fileId, uint32_t offset, const QByteArray &data)
             : m_fileId(fileId), m_offset(offset), m_data(data) {}
         static MsgImageData *create(uint16_t fileId, uint32_t offset, const QByteArray &data)
-            { return new MsgImageData(fileId, offset, data); }
+        {
+            return new MsgImageData(fileId, offset, data);
+        }
         uint16_t getFileId() const { return m_fileId; }
         uint32_t getOffset() const { return m_offset; }
         const QByteArray &getData() const { return m_data; }

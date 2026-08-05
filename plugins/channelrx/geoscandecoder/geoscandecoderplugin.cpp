@@ -18,10 +18,11 @@
 // You should have received a copy of the GNU General Public License                 //
 // along with this program. If not, see <http://www.gnu.org/licenses/>.              //
 ///////////////////////////////////////////////////////////////////////////////////////
-#include <QtPlugin>
+#include "geoscandecoderplugin.h"
 #include "plugin/pluginapi.h"
 
-#include "geoscandecoderplugin.h"
+#include <QtPlugin>
+
 #ifndef SERVER_MODE
 #include "geoscandecoder_gui.h"
 #endif
@@ -32,64 +33,66 @@ const PluginDescriptor GEOSCANDecoderPlugin::m_pluginDescriptor = {
     GEOSCANDecoder::m_channelId,
     QStringLiteral("GEOSCAN SATELLITES DECODER"),
     QStringLiteral("7.23.1"),
-	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
-	QStringLiteral("https://github.com/f4exb/sdrangel"),
-	true,
-	QStringLiteral("https://github.com/f4exb/sdrangel")
+    QStringLiteral("(c) Edouard Griffiths, F4EXB"),
+    QStringLiteral("https://github.com/f4exb/sdrangel"),
+    true,
+    QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-GEOSCANDecoderPlugin::GEOSCANDecoderPlugin(QObject* parent) :
-	QObject(parent),
-	m_pluginAPI(0)
+GEOSCANDecoderPlugin::GEOSCANDecoderPlugin(QObject *parent) : QObject(parent),
+                                                              m_pluginAPI(0)
 {
 }
 
-const PluginDescriptor& GEOSCANDecoderPlugin::getPluginDescriptor() const
+const PluginDescriptor &GEOSCANDecoderPlugin::getPluginDescriptor() const
 {
-	return m_pluginDescriptor;
+    return m_pluginDescriptor;
 }
 
-void GEOSCANDecoderPlugin::initPlugin(PluginAPI* pluginAPI)
+void GEOSCANDecoderPlugin::initPlugin(PluginAPI *pluginAPI)
 {
-	m_pluginAPI = pluginAPI;
+    m_pluginAPI = pluginAPI;
 
-	// register NFM demodulator
+    // register NFM demodulator
     m_pluginAPI->registerRxChannel(GEOSCANDecoder::m_channelIdURI, GEOSCANDecoder::m_channelId, this);
 }
 
 void GEOSCANDecoderPlugin::createRxChannel(DeviceAPI *deviceAPI, BasebandSampleSink **bs, ChannelAPI **cs) const
 {
-	if (bs || cs)
-	{
+    if (bs || cs)
+    {
         GEOSCANDecoder *instance = new GEOSCANDecoder(deviceAPI);
 
-		if (bs) {
-			*bs = instance;
-		}
+        if (bs)
+        {
+            *bs = instance;
+        }
 
-		if (cs) {
-			*cs = instance;
-		}
-	}
+        if (cs)
+        {
+            *cs = instance;
+        }
+    }
 }
 
 #ifdef SERVER_MODE
-ChannelGUI* GEOSCANDecoderPlugin::createRxChannelGUI(
-        DeviceUISet *deviceUISet,
-        BasebandSampleSink *rxChannel) const
+ChannelGUI *GEOSCANDecoderPlugin::createRxChannelGUI(
+    DeviceUISet *deviceUISet,
+    BasebandSampleSink *rxChannel
+) const
 {
-	(void) deviceUISet;
-	(void) rxChannel;
+    (void)deviceUISet;
+    (void)rxChannel;
     return nullptr;
 }
 #else
-ChannelGUI* GEOSCANDecoderPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const
+ChannelGUI *GEOSCANDecoderPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const
 {
-    return  GEOSCANDecoderGUI::create(m_pluginAPI, deviceUISet, rxChannel);
+    return GEOSCANDecoderGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }
 #endif
 
-ChannelWebAPIAdapter* GEOSCANDecoderPlugin::createChannelWebAPIAdapter() const
+ChannelWebAPIAdapter *GEOSCANDecoderPlugin::createChannelWebAPIAdapter() const
 {
     return nullptr;
 }

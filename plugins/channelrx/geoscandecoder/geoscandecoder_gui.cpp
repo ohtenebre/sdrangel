@@ -1,7 +1,7 @@
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/dialogpositioner.h"
-#include "dsp/dspcommands.h"
 #include "device/deviceuiset.h"
+#include "dsp/dspcommands.h"
 #include "geoscandecoder.h"
 #include "geoscandecoder_gui.h"
 #include "geoscandecoderbaseband.h"
@@ -10,23 +10,23 @@
 #include "ui_geoscandecoder.h"
 #include "util/db.h"
 
+#include <QBoxLayout>
 #include <QCoreApplication>
 #include <QDateTime>
-#include <QTimeZone>
 #include <QDebug>
+#include <QDoubleSpinBox>
 #include <QFileDialog>
 #include <QHeaderView>
 #include <QImage>
 #include <QMessageBox>
+#include <QPushButton>
 #include <QRegularExpression>
 #include <QTableWidget>
 #include <QTextCharFormat>
 #include <QTextCursor>
 #include <QTextStream>
+#include <QTimeZone>
 #include <QVBoxLayout>
-#include <QPushButton>
-#include <QDoubleSpinBox>
-#include <QBoxLayout>
 #include <cstdio>
 #include <cstring>
 
@@ -54,12 +54,14 @@ QByteArray GEOSCANDecoderGUI::serialize() const
 {
     return m_settings.serialize();
 }
+
 bool GEOSCANDecoderGUI::deserialize(const QByteArray &data)
 {
     m_settings.deserialize(data);
     displaySettings();
     return true;
 }
+
 void GEOSCANDecoderGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
@@ -105,43 +107,27 @@ void GEOSCANDecoderGUI::onMenuDialogCalled(const QPoint &p)
     resetContextMenuType();
 }
 
-GEOSCANDecoderGUI::GEOSCANDecoderGUI(PluginAPI *pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget *parent) : ChannelGUI(parent),
-                                                                                                                                       ui(new Ui::GEOSCANDecoderGUI),
-                                                                                                                                       m_pluginAPI(pluginAPI),
-                                                                                                                                       m_deviceUISet(deviceUISet),
-                                                                                                                                       m_channelMarker(this),
-                                                                                                                                       m_deviceCenterFrequency(0),
-                                                                                                                                       m_basebandSampleRate(1),
-                                                                                                                                       m_tickCount(0),
-                                                                                                                                       m_frameTotal(0),
-                                                                                                                                       m_frameCrcOk(0),
-                                                                                                                                       m_packetNumber(0),
-                                                                                                                                       m_hasTelemetry(false)
+GEOSCANDecoderGUI::GEOSCANDecoderGUI(PluginAPI *pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget *parent) : ChannelGUI(parent), ui(new Ui::GEOSCANDecoderGUI), m_pluginAPI(pluginAPI), m_deviceUISet(deviceUISet), m_channelMarker(this), m_deviceCenterFrequency(0), m_basebandSampleRate(1), m_tickCount(0), m_frameTotal(0), m_frameCrcOk(0), m_packetNumber(0), m_hasTelemetry(false)
 {
     setAttribute(Qt::WA_DeleteOnClose, true);
     m_helpURL = "plugins/channelrx/geoscandecoder/readme.md";
     RollupContents *rollupContents = getRollupContents();
     ui->setupUi(rollupContents);
 
-    // Удаляем ненужную вкладку AIS
     ui->tabWidget->removeTab(1);
-    // Переименовываем ADS-B в Telemetry
     ui->tabWidget->setTabText(0, "Телеметрия");
 
-    // Создаем дерево телеметрии
     m_telemetryTree = new QTreeWidget();
     m_telemetryTree->setHeaderLabels({ "Пакет", "Значение" });
     m_telemetryTree->header()->setSectionResizeMode(QHeaderView::Stretch);
     m_telemetryTree->setAlternatingRowColors(true);
     m_telemetryTree->setAnimated(true);
 
-    // Поиск по телеметрии
     m_telemetrySearch = new QLineEdit();
     m_telemetrySearch->setPlaceholderText("Поиск по телеметрии...");
     m_telemetrySearch->setClearButtonEnabled(true);
     connect(m_telemetrySearch, &QLineEdit::textChanged, this, &GEOSCANDecoderGUI::on_telemetrySearch_textChanged);
 
-    // Вставляем дерево в существующий виджет ADS_B (теперь Telemetry)
     if (!ui->ADS_B->layout())
     {
         QVBoxLayout *layout = new QVBoxLayout(ui->ADS_B);
@@ -165,7 +151,6 @@ GEOSCANDecoderGUI::GEOSCANDecoderGUI(PluginAPI *pluginAPI, DeviceUISet *deviceUI
     ui->logEnable->setCheckable(true);
     ui->useFileTime->setCheckable(true);
 
-    // Спутник и результат — программно в powLayout перед Df
     m_satFreq = new QLineEdit();
     m_satFreq->setFixedWidth(100);
     m_satFreq->setPlaceholderText("Частота спутника");
@@ -224,13 +209,9 @@ GEOSCANDecoderGUI::GEOSCANDecoderGUI(PluginAPI *pluginAPI, DeviceUISet *deviceUI
         obsLayout->addWidget(m_observerAlt);
 
         if (auto *boxLayout = qobject_cast<QBoxLayout *>(parentLayout))
-        {
             boxLayout->insertLayout(insertIdx, obsLayout);
-        }
         else
-        {
             parentLayout->addItem(obsLayout);
-        }
     }
 
     // Doppler timer
@@ -238,23 +219,22 @@ GEOSCANDecoderGUI::GEOSCANDecoderGUI(PluginAPI *pluginAPI, DeviceUISet *deviceUI
     m_dopplerTimer->setInterval(1000);
     connect(m_dopplerTimer, &QTimer::timeout, this, &GEOSCANDecoderGUI::updateDoppler);
 
-    connect(m_observerLat, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, [this](double) {
+    connect(m_observerLat, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, [this](double)
+            {
         m_settings.m_observerLat = m_observerLat->value();
-        applySettings(QStringList("observerLat"));
-    });
-    connect(m_observerLon, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, [this](double) {
+        applySettings(QStringList("observerLat")); });
+    connect(m_observerLon, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, [this](double)
+            {
         m_settings.m_observerLon = m_observerLon->value();
-        applySettings(QStringList("observerLon"));
-    });
-    connect(m_observerAlt, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, [this](double) {
+        applySettings(QStringList("observerLon")); });
+    connect(m_observerAlt, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, [this](double)
+            {
         m_settings.m_observerAltM = m_observerAlt->value();
-        applySettings(QStringList("observerAltM"));
-    });
+        applySettings(QStringList("observerAltM")); });
 
     displaySettings();
     makeUIConnections();
 
-    // DSP settings: extract groupBox_3 from main layout, create dialog
     m_dspSettingsWidget = ui->groupBox_3;
     ui->verticalLayout_3->removeWidget(m_dspSettingsWidget);
 
@@ -331,9 +311,12 @@ void GEOSCANDecoderGUI::displaySettings()
     ui->saveImageBtn->setVisible(m_settings.m_mergeMode);
     ui->threshold->setValue(m_settings.m_corrThreshold);
     ui->thresholdText->setText(QString::number(m_settings.m_corrThreshold));
-    if (m_observerLat) m_observerLat->setValue(m_settings.m_observerLat);
-    if (m_observerLon) m_observerLon->setValue(m_settings.m_observerLon);
-    if (m_observerAlt) m_observerAlt->setValue(m_settings.m_observerAltM);
+    if (m_observerLat)
+        m_observerLat->setValue(m_settings.m_observerLat);
+    if (m_observerLon)
+        m_observerLon->setValue(m_settings.m_observerLon);
+    if (m_observerAlt)
+        m_observerAlt->setValue(m_settings.m_observerAltM);
     ui->dopplerEnabled->setChecked(m_settings.m_dopplerEnabled);
     updateAbsoluteCenterFrequency();
     highlightSearchMatches();
@@ -442,6 +425,7 @@ void GEOSCANDecoderGUI::updateAbsoluteCenterFrequency()
 {
     setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
 }
+
 void GEOSCANDecoderGUI::onTleButtonClicked()
 {
     QString fileName = QFileDialog::getOpenFileName(this, tr("\u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 TLE \u0444\u0430\u0439\u043b"), "", tr("TLE files (*.txt *.tle);;All files (*)"));
@@ -461,7 +445,7 @@ void GEOSCANDecoderGUI::onTleButtonClicked()
     ui->satelliteCombo->blockSignals(true);
     ui->satelliteCombo->clear();
     ui->satelliteCombo->addItem("-- \u0432\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u0441\u043f\u0443\u0442\u043d\u0438\u043a --");
-    for (const auto& sat : m_tleSatellites)
+    for (const auto &sat : m_tleSatellites)
     {
         ui->satelliteCombo->addItem(QString::fromStdString(sat.name));
     }
@@ -472,6 +456,7 @@ void GEOSCANDecoderGUI::onTleButtonClicked()
     auto [ok, msg] = tle_check_freshness(sats[0].line1);
     qWarning().noquote() << "[TLE]" << QString::fromStdString(msg);
 }
+
 void GEOSCANDecoderGUI::onSatelliteChanged(int index)
 {
     if (index <= 0 || (size_t)index > m_tleSatellites.size())
@@ -482,7 +467,7 @@ void GEOSCANDecoderGUI::onSatelliteChanged(int index)
         return;
     }
 
-    const TleData& sat = m_tleSatellites[index - 1];
+    const TleData &sat = m_tleSatellites[index - 1];
     char line1[70] = {}, line2[70] = {};
     std::strncpy(line1, sat.line1.c_str(), 69);
     std::strncpy(line2, sat.line2.c_str(), 69);
@@ -495,6 +480,7 @@ void GEOSCANDecoderGUI::onSatelliteChanged(int index)
     m_dopplerTimer->start();
     updateDoppler();
 }
+
 void GEOSCANDecoderGUI::on_dopplerEnabled_toggled(bool checked)
 {
     m_settings.m_dopplerEnabled = checked;
@@ -514,6 +500,7 @@ void GEOSCANDecoderGUI::on_dopplerEnabled_toggled(bool checked)
         ui->deltaFrequency->setValue(0);
     }
 }
+
 void GEOSCANDecoderGUI::updateDoppler()
 {
     if (!m_tleActive || !m_settings.m_dopplerEnabled)
@@ -526,7 +513,7 @@ void GEOSCANDecoderGUI::updateDoppler()
 
     auto now = std::chrono::system_clock::now();
     std::time_t now_tt = std::chrono::system_clock::to_time_t(now);
-    std::tm* utc = std::gmtime(&now_tt);
+    std::tm *utc = std::gmtime(&now_tt);
 
     int y = utc->tm_year + 1900;
     int m = utc->tm_mon + 1;
@@ -578,21 +565,22 @@ void GEOSCANDecoderGUI::addTelemetryPacket(const GEOSCANDecoderBaseband::Telemet
 {
     m_packetNumber++;
 
-    auto addRow = [](QTreeWidgetItem *parent, const QString &name, const QString &value) {
+    auto addRow = [](QTreeWidgetItem *parent, const QString &name, const QString &value)
+    {
         auto *item = new QTreeWidgetItem(parent);
         item->setText(0, name);
         item->setText(1, value);
     };
 
     QDateTime dt = m_settings.m_useFileTime
-        ? QDateTime::fromSecsSinceEpoch(d.timestamp, QTimeZone::utc())
-        : QDateTime::currentDateTime();
+                       ? QDateTime::fromSecsSinceEpoch(d.timestamp, QTimeZone::utc())
+                       : QDateTime::currentDateTime();
 
     QString summary = QString("#%1 | %2 | %3 → %4")
-        .arg(m_packetNumber)
-        .arg(dt.toString("HH:mm:ss"))
-        .arg(d.sourceCallsign)
-        .arg(d.destinationCallsign);
+                          .arg(m_packetNumber)
+                          .arg(dt.toString("HH:mm:ss"))
+                          .arg(d.sourceCallsign)
+                          .arg(d.destinationCallsign);
 
     auto *root = new QTreeWidgetItem(m_telemetryTree);
     root->setText(0, summary);
@@ -678,7 +666,7 @@ bool GEOSCANDecoderGUI::handleMessage(const Message &msg)
             m_settings.m_aaLpfTransition = m_basebandSampleRate / 8.0f;
             ui->aaFilterCutoff->setValue(m_settings.m_aaLpfCutoff);
             ui->aaFilterTransition->setValue(m_settings.m_aaLpfTransition);
-            applySettings(QStringList({"aaLpfCutoff", "aaLpfTransition"}));
+            applySettings(QStringList({ "aaLpfCutoff", "aaLpfTransition" }));
         }
         m_satFreq->setText(QString::number(m_deviceCenterFrequency));
         on_satFreq_editingFinished();
@@ -809,9 +797,7 @@ void GEOSCANDecoderGUI::displayImage()
     QImage img;
     if (img.loadFromData(buf))
     {
-        ui->imageLabel->setPixmap(QPixmap::fromImage(img).scaled(
-            ui->imageLabel->width(), ui->imageLabel->height(),
-            Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        ui->imageLabel->setPixmap(QPixmap::fromImage(img).scaled(ui->imageLabel->width(), ui->imageLabel->height(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
     }
     else
     {
@@ -908,6 +894,7 @@ void GEOSCANDecoderGUI::handleInputMessages()
             delete m;
     }
 }
+
 void GEOSCANDecoderGUI::channelMarkerHighlightedByCursor() {}
 void GEOSCANDecoderGUI::leaveEvent(QEvent *) {}
 void GEOSCANDecoderGUI::enterEvent(EnterEventType *) {}
@@ -969,18 +956,21 @@ void GEOSCANDecoderGUI::on_iqRecordEnable_toggled(bool checked)
         qWarning() << "[GEOSCAN] Текстовый лог остановлен.";
     }
 }
+
 void GEOSCANDecoderGUI::on_iqRecordArm_toggled(bool checked)
 {
     m_settings.m_iqRecordEnabled = checked;
     applySettings({ "iqRecordEnabled" });
     qWarning() << "[GEOSCAN] IQ запись" << (checked ? "взведена (ждём sync)" : "снята");
 }
+
 void GEOSCANDecoderGUI::on_iqWavRecord_toggled(bool checked)
 {
     m_settings.m_iqWavEnabled = checked;
     applySettings({ "iqWavEnabled" });
     qWarning() << "[GEOSCAN] WAV IQ" << (checked ? "включена" : "выключена");
 }
+
 void GEOSCANDecoderGUI::applySettings(const QStringList &settingsKeys, bool force)
 {
     GEOSCANDecoder::MsgConfigureGEOSCANDecoder *message = GEOSCANDecoder::MsgConfigureGEOSCANDecoder::create(settingsKeys, m_settings, force);
@@ -1106,24 +1096,42 @@ void GEOSCANDecoderGUI::on_logOpen_clicked()
                     d.pid = fields.size() >= 7 ? fields[6].toUShort(nullptr, 0) : 0;
                     d.epsMode = fields.size() >= 8 ? fields[7].toUInt() : 0;
 
-                    if (fields.size() >= 9) d.currentLoadMa = fields[8].toUInt();
-                    if (fields.size() >= 10) d.currentSolarMa = fields[9].toUInt();
-                    if (fields.size() >= 11) d.voltageBattOneMv = fields[10].toUInt();
-                    if (fields.size() >= 12) d.voltageBattSumMv = fields[11].toUInt();
-                    if (fields.size() >= 13) d.tempBatt1 = fields[12].toShort();
-                    if (fields.size() >= 14) d.tempBatt2 = fields[13].toShort();
-                    if (fields.size() >= 15) d.tempXPlus = fields[14].toShort();
-                    if (fields.size() >= 16) d.tempXMinus = fields[15].toShort();
-                    if (fields.size() >= 17) d.tempYPlus = fields[16].toShort();
-                    if (fields.size() >= 18) d.tempYMinus = fields[17].toShort();
-                    if (fields.size() >= 19) d.obcActivity = fields[18].toUInt();
-                    if (fields.size() >= 20) d.gnssCount = fields[19].toUInt();
-                    if (fields.size() >= 21) d.mediaFilesCount = fields[20].toUInt();
-                    if (fields.size() >= 22) d.vbusVoltageMv = fields[21].toUInt();
-                    if (fields.size() >= 23) d.rssiLast = fields[22].toShort();
-                    if (fields.size() >= 24) d.rssiMin = fields[23].toShort();
-                    if (fields.size() >= 25) d.packetsSent = fields[24].toUInt();
-                    if (fields.size() >= 26) d.qsoReceived = fields[25].toUInt();
+                    if (fields.size() >= 9)
+                        d.currentLoadMa = fields[8].toUInt();
+                    if (fields.size() >= 10)
+                        d.currentSolarMa = fields[9].toUInt();
+                    if (fields.size() >= 11)
+                        d.voltageBattOneMv = fields[10].toUInt();
+                    if (fields.size() >= 12)
+                        d.voltageBattSumMv = fields[11].toUInt();
+                    if (fields.size() >= 13)
+                        d.tempBatt1 = fields[12].toShort();
+                    if (fields.size() >= 14)
+                        d.tempBatt2 = fields[13].toShort();
+                    if (fields.size() >= 15)
+                        d.tempXPlus = fields[14].toShort();
+                    if (fields.size() >= 16)
+                        d.tempXMinus = fields[15].toShort();
+                    if (fields.size() >= 17)
+                        d.tempYPlus = fields[16].toShort();
+                    if (fields.size() >= 18)
+                        d.tempYMinus = fields[17].toShort();
+                    if (fields.size() >= 19)
+                        d.obcActivity = fields[18].toUInt();
+                    if (fields.size() >= 20)
+                        d.gnssCount = fields[19].toUInt();
+                    if (fields.size() >= 21)
+                        d.mediaFilesCount = fields[20].toUInt();
+                    if (fields.size() >= 22)
+                        d.vbusVoltageMv = fields[21].toUInt();
+                    if (fields.size() >= 23)
+                        d.rssiLast = fields[22].toShort();
+                    if (fields.size() >= 24)
+                        d.rssiMin = fields[23].toShort();
+                    if (fields.size() >= 25)
+                        d.packetsSent = fields[24].toUInt();
+                    if (fields.size() >= 26)
+                        d.qsoReceived = fields[25].toUInt();
 
                     m_lastTelemetry = d;
                     m_hasTelemetry = true;

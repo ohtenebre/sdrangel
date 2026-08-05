@@ -11,10 +11,10 @@
 #include <QHostAddress>
 #include <QTimeZone>
 #include <QUdpSocket>
+#include <cstdint>
 #include <stdio.h>
 #include <string.h>
 #include <vector>
-#include <cstdint>
 
 #if defined(_MSC_VER)
 #include <intrin.h>
@@ -382,24 +382,8 @@ void GEOSCANDecoderBaseband::processPacket(std::vector<uint8_t> &packet, bool in
 
     bool crcOk = checkCRC16(packet);
 
-    // Дедупликация от 8 параллельных потоков: 200 отсчётов окно, CRC-OK вытесняет CRC-FAIL
-    if (m_sampleCount - m_lastPacketSampleCount < 200)
-    {
-        if (crcOk && !m_lastPacketWasCrcOk)
-        {
-            m_lastPacketWasCrcOk = true;
-            m_lastPacketSampleCount = m_sampleCount;
-        }
-        else
-        {
-            return;
-        }
-    }
-    else
-    {
-        m_lastPacketWasCrcOk = crcOk;
-        m_lastPacketSampleCount = m_sampleCount;
-    }
+    m_lastPacketWasCrcOk = crcOk;
+    m_lastPacketSampleCount = m_sampleCount;
 
     if (!crcOk || packet.size() < 74)
     {
@@ -473,7 +457,7 @@ void GEOSCANDecoderBaseband::processPacket(std::vector<uint8_t> &packet, bool in
     tel.control = packet[14];
     tel.pid = packet[15];
 
-    // Телеметрию выводим только для пакетов с адресом назначения BEACON
+    // Telemetry only with BEACON
     if (tel.destinationCallsign.section('-', 0, 0) != "BEACON")
         return;
 
@@ -610,29 +594,19 @@ void GEOSCANDecoderBaseband::applySettings(const QStringList &k, const GEOSCANDe
     bool needUpdateResampler = force || k.contains("resamplerEnabled") || k.contains("resamplerInputRate") || k.contains("resamplerOutputRate");
 
     if (updateLPF)
-    {
         std::atomic_store(&m_lpf, std::make_shared<FIRFilter>(generate_lowpass(m_settings.m_lpfGain, (float)m_effectiveSampleRate, m_settings.m_lpfCutoff, m_settings.m_lpfTransition)));
-    }
 
     if (updateAALPF)
-    {
         std::atomic_store(&m_aaFilter, std::make_shared<ComplexFIRFilter>(generate_lowpass(m_settings.m_aaLpfGain, (float)m_basebandSampleRate, m_settings.m_aaLpfCutoff, m_settings.m_aaLpfTransition)));
-    }
 
     if (updateFreqShift)
-    {
         m_freqShifter.setFrequency(-(float)m_settings.m_inputFrequencyOffset, (float)m_basebandSampleRate);
-    }
 
     if (needUpdateResampler)
-    {
         updateResampler();
-    }
 
     if (force || k.contains("symSyncType") || k.contains("symSyncSps") || k.contains("symSyncLoopBw") || k.contains("symSyncDamping") || k.contains("symSyncTedGain") || k.contains("symSyncMaxDev"))
-    {
         updateSymbolSync();
-    }
 
     m_mutex.unlock();
 }
