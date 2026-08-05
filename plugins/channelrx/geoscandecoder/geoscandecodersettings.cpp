@@ -52,7 +52,7 @@ void GEOSCANDecoderSettings::resetToDefaults()
     m_symSyncDamping = 1.0f;
     m_symSyncTedGain = 1.0f;
     m_symSyncMaxDev = 0.00001f;
-    m_mergeMode = true;
+    m_mergeMode = false;
     m_corrThreshold = 0;
     m_observerLat = 0.0f;
     m_observerLon = 0.0f;
@@ -171,7 +171,7 @@ bool GEOSCANDecoderSettings::deserialize(const QByteArray &data)
         d.readReal(32, &m_symSyncDamping, 1.0f);
         d.readReal(33, &m_symSyncTedGain, 1.0f);
         d.readReal(34, &m_symSyncMaxDev, 0.05f);
-        d.readBool(35, &m_mergeMode, true);
+        d.readBool(35, &m_mergeMode, false);
         d.readS32(36, &m_corrThreshold, 2);
         d.readReal(37, &m_observerLat, 0.0);
         d.readReal(38, &m_observerLon, 0.0);

@@ -101,6 +101,7 @@ class GEOSCANDecoderGUI : public ChannelGUI {
     QMap<uint16_t, uint32_t> m_imageInstance;
     QMap<uint16_t, int> m_imageRxCount;
     QMap<uint16_t, int> m_imageChunkCount;
+    uint16_t m_lastActiveImageId = 0;
     QString m_sessionDir;
     void saveImage(uint16_t fileId, const QByteArray &data, uint32_t instance);
 

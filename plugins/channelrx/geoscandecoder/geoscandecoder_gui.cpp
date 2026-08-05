@@ -764,6 +764,7 @@ bool GEOSCANDecoderGUI::handleMessage(const Message &msg)
 
         m_imageRxCount[fileId] += data.size();
         m_imageChunkCount[fileId]++;
+        m_lastActiveImageId = fileId;
 
         if (m_settings.m_mergeMode)
         {
@@ -786,7 +787,9 @@ void GEOSCANDecoderGUI::displayImage()
 {
     if (m_imageBuffers.isEmpty())
         return;
-    auto it = m_imageBuffers.begin();
+    auto it = m_imageBuffers.find(m_lastActiveImageId);
+    if (it == m_imageBuffers.end())
+        it = m_imageBuffers.begin();
     uint16_t fileId = it.key();
     const QByteArray &buf = it.value();
     if (buf.isEmpty())
